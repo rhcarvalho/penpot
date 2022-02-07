@@ -74,7 +74,7 @@
            
            (println "on-add" ids)
            (st/emit! (dch/update-shapes ids #(update % :fill (fnil conj []) {:fill-color cp/default-color
-                                                                              :fill-opacity 1})))
+                                                                             :fill-opacity 1})))
           ;;  (rx/of (dch/update-shapes shape-ids (fn [shape] (d/merge shape attrs)))
            ))
 
@@ -104,7 +104,9 @@
                          ids
                          #(-> %
                               (assoc-in [:fill index] {:fill-color (:color color)
-                                                       :fill-opacity (:opacity color)})))))))
+                                                       :fill-opacity (:opacity color)
+                                                       :fill-color-gradient (:gradient color)})))))))
+;; TODO: :id -> :fill-color-ref-id :file-id -> :fill-color-ref-file
 
         on-detach
         (mf/use-callback

@@ -26,7 +26,7 @@
 
         transform (gsh/transform-matrix shape)
 
-        fill-attrs (-> (attrs/extract-fill-attrs shape)
+        fill-attrs (-> (attrs/extract-fill-attrs shape 0)
                        (obj/set! "width" width)
                        (obj/set! "height" height))
 

@@ -26,7 +26,7 @@
             embed (embed/use-data-uris [uri])
             transform (gsh/transform-matrix shape)
             shape-without-image (dissoc shape :fill-image)
-            fill-attrs (-> (attrs/extract-fill-attrs shape-without-image)
+            fill-attrs (-> (attrs/extract-fill-attrs shape-without-image 0)
                            (obj/set! "width" width)
                            (obj/set! "height" height))]
 

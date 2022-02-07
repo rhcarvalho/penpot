@@ -63,7 +63,7 @@
       [:defs
        [:& defs/svg-defs          {:shape shape :render-id render-id}]
        [:& filters/filters        {:shape shape :filter-id filter-id}]
-       [:& grad/gradient          {:shape shape :attr :fill-color-gradient}]
+      ;;  [:& grad/gradient          {:shape shape :attr :fill-color-gradient}]
        [:& grad/gradient          {:shape shape :attr :stroke-color-gradient}]
       ;;  [:& fim/fill-image-pattern {:shape shape :render-id render-id}]
        [:& cs/stroke-defs         {:shape shape :render-id render-id}]

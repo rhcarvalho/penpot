@@ -79,15 +79,16 @@
                                      "z")}))
     attrs))
 
-(defn add-fill [attrs shape render-id]
-  (let [_ (println "add-fill" attrs shape render-id)
+(defn add-fill [attrs shape render-id index]
+  (let [
+        ;; _ (println "add-fill" attrs shape render-id)
         fill-attrs (cond
                      (contains? shape :fill-image)
                      (let [fill-image-id (str "fill-image-" render-id)]
                        {:fill (str/format "url(#%s)" fill-image-id)})
 
                      (contains? shape :fill-color-gradient)
-                     (let [fill-color-gradient-id (str "fill-color-gradient_" render-id)]
+                     (let [fill-color-gradient-id (str "fill-color-gradient_" render-id "_" index)]
                        {:fill (str/format "url(#%s)" fill-color-gradient-id)})
 
                      (contains? shape :fill-color)
@@ -210,10 +211,10 @@
       (add-style-attrs shape)))
 
 (defn extract-fill-attrs
-  [shape]
+  [shape index]
   (let [render-id (mf/use-ctx muc/render-ctx)
         fill-styles (-> (obj/get shape "style" (obj/new))
-                        (add-fill shape render-id))]
+                        (add-fill shape render-id index))]
     (-> (obj/new)
         (obj/set! "style" fill-styles))))
 

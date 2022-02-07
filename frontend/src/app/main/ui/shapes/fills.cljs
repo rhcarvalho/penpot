@@ -11,6 +11,7 @@
    [app.config :as cfg]
    [app.main.ui.shapes.attrs :as attrs]
    [app.main.ui.shapes.embed :as embed]
+   [app.main.ui.shapes.gradients :as grad]
    [app.util.object :as obj]
    [rumext.alpha :as mf]))
 
@@ -30,27 +31,41 @@
           embed (embed/use-data-uris [uri])
           transform (gsh/transform-matrix shape)
           shape-without-image (dissoc shape :fill-image)
-          fill-attrs (-> (attrs/extract-fill-attrs shape-without-image)
+          fill-attrs (-> (attrs/extract-fill-attrs shape-without-image 0)
                          (obj/set! "width" width)
-                         (obj/set! "height" height))]
+                         (obj/set! "height" height))
+          _ (println ":fill" (:fill shape))
+          gradients (filter #(contains? % :fill-color-gradient) (:fill shape))
+          _ (println "gradients" gradients)
+          ]
 
-      [:pattern {:id fill-id
-                 :patternUnits "userSpaceOnUse"
-                 :x x
-                 :y y
-                 :height height
-                 :width width
-                 :patternTransform transform
-                 :data-loading (str (not (contains? embed uri)))}
-       [:g
-        (for [[index value] (-> (d/enumerate (:fill shape [])) reverse)]
-          [:> :rect (-> (attrs/extract-fill-attrs value)
-                        (obj/set! "width" width)
-                        (obj/set! "height" height))])
-        [:> :rect fill-attrs]
+      [:*
+       (for [[index gradient] (-> (d/enumerate gradients) reverse)]
+         (case (:type (:fill-color-gradient gradient))
+           :linear [:> grad/linear-gradient #js {:id (str (name :fill-color-gradient) "_" render-id "_" index)
+                                            :gradient (:fill-color-gradient gradient)
+                                            :shape shape}]
+           :radial [:> grad/radial-gradient #js {:id (str (name :fill-color-gradient) "_" render-id "_" index)
+                                            :gradient (:fill-color-gradient gradient)
+                                            :shape shape}]))
 
-        (when has-image
-          [:image {:xlinkHref (get embed uri uri)
-                   :width width
-                   :height height}])
-        ]])))
+       
+       [:pattern {:id fill-id
+                  :patternUnits "userSpaceOnUse"
+                  :x x
+                  :y y
+                  :height height
+                  :width width
+                  :patternTransform transform
+                  :data-loading (str (not (contains? embed uri)))}
+        [:g
+         (for [[index value] (-> (d/enumerate (:fill shape [])) reverse)]
+           [:> :rect (-> (attrs/extract-fill-attrs value index)
+                         (obj/set! "width" width)
+                         (obj/set! "height" height))])
+         [:> :rect fill-attrs]
+
+         (when has-image
+           [:image {:xlinkHref (get embed uri uri)
+                    :width width
+                    :height height}])]]])))
