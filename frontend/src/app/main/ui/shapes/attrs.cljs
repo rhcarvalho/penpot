@@ -195,10 +195,12 @@
 
          styles (-> (obj/get props "style" (obj/new))
                     (obj/merge! svg-styles)
-                    ;; (add-fill shape render-id)
-                    (obj/set! "fill" (str "url(#fill-" render-id ")"))
                     (add-stroke shape render-id)
-                    (add-layer-props shape))]
+                    (add-layer-props shape))
+
+         styles (if (> (count (:fill shape)) 1)
+                  (obj/set! styles "fill" (str "url(#fill-" render-id ")"))
+                  (add-fill styles (get-in shape [:fill 0]) render-id 0))]
 
      (-> props
          (obj/merge! svg-attrs)

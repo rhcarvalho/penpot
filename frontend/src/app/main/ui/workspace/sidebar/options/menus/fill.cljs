@@ -55,10 +55,9 @@
                :id (:fill-color-ref-id values)
                :file-id (:fill-color-ref-file values)
                :gradient (:fill-color-gradient values)}
-        
+
         _ (println "COLOR" color)
         _ (println "fill-values" fill-values)
-        
 
         hide-fill-on-export? (:hide-fill-on-export values false)
 
@@ -69,9 +68,9 @@
          (mf/deps ids)
          (fn [_]
            #_(st/emit! (dc/change-fill ids {:color cp/default-color
-                                          :opacity 1}))
+                                            :opacity 1}))
 
-           
+
            (println "on-add" ids)
            (st/emit! (dch/update-shapes ids #(update % :fill (fnil conj []) {:fill-color cp/default-color
                                                                              :fill-opacity 1})))
@@ -101,13 +100,24 @@
            (fn [color]
              (println "COLOR" color)
              (st/emit! (dch/update-shapes
-                         ids
-                         #(-> %
-                              (assoc-in [:fill index] {:fill-color (:color color)
-                                                       :fill-opacity (:opacity color)
+                        ids
+                        #(-> %
+                             (assoc-in [:fill index] {:fill-color (:color color)
+                                                      :fill-opacity (:opacity color)
                                                       ;;  :fill-color-gradient (:gradient color)
-                                                       })))))))
-;; TODO: :id -> :fill-color-ref-id :file-id -> :fill-color-ref-file
+                                                      })))))))
+                         ;; TODO: :id -> :fill-color-ref-id :file-id -> :
+
+        remove-extra-fill-by-index
+        (fn [values index] (->> (d/enumerate values)
+                                (filterv (fn [[idx _]] (not= idx index)))
+                                (mapv second)))
+
+        on-remove-extra-fill
+        (fn [index]
+          (fn []
+            
+            (st/emit! (dch/update-shapes ids #(update % :fill remove-extra-fill-by-index index)))))
 
         on-detach
         (mf/use-callback
@@ -144,21 +154,25 @@
          [:div.add-page {:on-click on-delete} i/minus])]
 
        [:div.element-set-content
-        [:div (println "aaaaa" color)]
-        [:& color-row {:color color
-                       :title (tr "workspace.options.fill")
-                       :on-change on-change
-                       :on-detach on-detach}]
+        #_(if show?
+        [:div
+         [:& color-row {:color color
+                        :title (tr "workspace.options.fill")
+                        :on-change on-change
+                        :on-detach on-detach}]
+         [:div.element-set-actions-button {:on-click on-delete} i/minus]])
 
         (for [[index value] (d/enumerate (:fill fill-values []))]
-          [:& color-row {:color {:color (:fill-color value)
-                                 :opacity (:fill-opacity value)
-                                 :id (:fill-color-ref-id value)
-                                 :file-id (:fill-color-ref-file value)
-                                 :gradient (:fill-color-gradient value)}
-                         :title (tr "workspace.options.fill")
-                         :on-change (on-change-extra-fill index)
-                         :on-detach on-detach}])
+          [:div
+           [:& color-row {:color {:color (:fill-color value)
+                                  :opacity (:fill-opacity value)
+                                  :id (:fill-color-ref-id value)
+                                  :file-id (:fill-color-ref-file value)
+                                  :gradient (:fill-color-gradient value)}
+                          :title (tr "workspace.options.fill")
+                          :on-change (on-change-extra-fill index)
+                          :on-detach on-detach}]
+           [:div.element-set-actions-button {:on-click (on-remove-extra-fill index)} i/minus]])
 
         (when (or (= type :frame)
                   (and (= type :multiple) (some? hide-fill-on-export?)))

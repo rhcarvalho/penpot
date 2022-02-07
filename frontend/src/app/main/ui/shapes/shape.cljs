@@ -55,7 +55,7 @@
           (= :group type)
           (attrs/add-style-attrs shape render-id))
         
-        _ (println "xxxxxxxxxxx" (:fill shape))]
+        _ (println "xxxxxxxxxxx" (count (:fill shape)))]
 
     [:& (mf/provider muc/render-ctx) {:value render-id}
      [:> :g wrapper-props
@@ -65,10 +65,13 @@
       [:defs
        [:& defs/svg-defs          {:shape shape :render-id render-id}]
        [:& filters/filters        {:shape shape :filter-id filter-id}]
-      ;;  [:& grad/gradient          {:shape shape :attr :fill-color-gradient}]
        [:& grad/gradient          {:shape shape :attr :stroke-color-gradient}]
-      ;;  [:& fim/fill-image-pattern {:shape shape :render-id render-id}]
+       (if (> (count (:fill shape)) 1)
+           [:& fills/fills            {:shape shape :render-id render-id}]
+           [:*
+            [:& grad/gradient          {:shape shape :attr :fill-color-gradient}]
+            [:& fim/fill-image-pattern {:shape shape :render-id render-id}]])
        [:& cs/stroke-defs         {:shape shape :render-id render-id}]
        [:& frame/frame-clip-def   {:shape shape :render-id render-id}]
-       [:& fills/fills            {:shape shape :render-id render-id}]]
+       ]
       children]]))

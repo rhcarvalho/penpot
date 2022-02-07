@@ -41,8 +41,10 @@
 (def ^:private minimal-shapes
   [{:type :rect
     :name "Rect-1"
-    :fill-color default-color
-    :fill-opacity 1
+    ;; :fill-color default-color
+    ;; :fill-opacity 1
+    :fill [{:fill-color default-color
+            :fill-opacity 1}]
     :stroke-style :none
     :stroke-alignment :center
     :stroke-width 0
