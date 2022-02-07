@@ -20,11 +20,12 @@
    [rumext.alpha :as mf]))
 
 (def fill-attrs
-  [:fill-color
-   :fill-opacity
-   :fill-color-ref-id
-   :fill-color-ref-file
-   :fill-color-gradient
+  [:fill
+  ;;  :fill-color
+  ;;  :fill-opacity
+  ;;  :fill-color-ref-id
+  ;;  :fill-color-ref-file
+  ;;  :fill-color-gradient
    :hide-fill-on-export])
 
 (def fill-attrs-shape
@@ -40,8 +41,8 @@
 ;;      :fill-opacity 1}))
 
 (mf/defc fill-menu
-  {::mf/wrap [#(mf/memo' % (mf/check-props ["ids" "values" "fill-values"]))]}
-  [{:keys [ids type values fill-values disable-remove?] :as props}]
+  {::mf/wrap [#(mf/memo' % (mf/check-props ["ids" "values"]))]}
+  [{:keys [ids type values disable-remove?] :as props}]
   (let [show? (or (not (nil? (:fill-color values)))
                   (not (nil? (:fill-color-gradient values))))
 
@@ -57,7 +58,7 @@
                :gradient (:fill-color-gradient values)}
 
         _ (println "COLOR" color)
-        _ (println "fill-values" fill-values)
+        _ (println "values" values)
 
         hide-fill-on-export? (:hide-fill-on-export values false)
 
@@ -76,8 +77,6 @@
                                                                              :fill-opacity 1})))
           ;;  (rx/of (dch/update-shapes shape-ids (fn [shape] (d/merge shape attrs)))
            ))
-
-        _ (println "fill-values" fill-values)
 
         on-delete
         (mf/use-callback
@@ -162,7 +161,7 @@
                         :on-detach on-detach}]
          [:div.element-set-actions-button {:on-click on-delete} i/minus]])
 
-        (for [[index value] (d/enumerate (:fill fill-values []))]
+        (for [[index value] (d/enumerate (:fill values []))]
           [:div
            [:& color-row {:color {:color (:fill-color value)
                                   :opacity (:fill-opacity value)

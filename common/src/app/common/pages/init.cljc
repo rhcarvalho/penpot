@@ -59,8 +59,10 @@
 
    {:type :circle
     :name "Circle-1"
-    :fill-color default-color
-    :fill-opacity 1
+    ;; :fill-color default-color
+    ;; :fill-opacity 1
+    :fill [{:fill-color default-color
+            :fill-opacity 1}]
     :stroke-style :none
     :stroke-alignment :center
     :stroke-width 0
@@ -77,8 +79,10 @@
 
    {:type :frame
     :name "Artboard-1"
-    :fill-color clr/white
-    :fill-opacity 1
+    ;; :fill-color clr/white
+    ;; :fill-opacity 1
+    :fill [{:fill-color clr/white
+            :fill-opacity 1}]
     :stroke-style :none
     :stroke-alignment :center
     :stroke-width 0
