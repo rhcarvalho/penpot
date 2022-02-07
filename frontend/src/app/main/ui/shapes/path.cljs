@@ -34,8 +34,8 @@
                                  :cause e)
                        "")))
 
-        render-id  (mf/use-ctx muc/render-ctx)
-        shape (assoc shape :fill-image (str "fill-image-" render-id))
+        ;; render-id  (mf/use-ctx muc/render-ctx)
+        ;; shape (assoc shape :fill-image (str "fill-image-" render-id))
         props   (-> (attrs/extract-style-attrs shape)
                     (obj/set! "d" pdata))]
 

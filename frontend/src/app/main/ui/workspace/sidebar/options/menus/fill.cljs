@@ -6,7 +6,10 @@
 
 (ns app.main.ui.workspace.sidebar.options.menus.fill
   (:require
+   [app.common.data :as d]
    [app.common.pages :as cp]
+   [app.common.uuid :as uuid]
+   [app.main.data.workspace.changes :as dch]
    [app.main.data.workspace.colors :as dc]
    [app.main.store :as st]
    [app.main.ui.icons :as i]
@@ -27,9 +30,18 @@
 (def fill-attrs-shape
   (conj fill-attrs :hide-fill-on-export))
 
+;; (defn create-fill []
+;;   (let [id (uuid/next)]
+;;     {:id id
+;;      :fill-color cp/default-color
+;;      :fill-color-gradient nil
+;;      ::fill-color-ref-file nil
+;;      :fill-color-ref-id nil
+;;      :fill-opacity 1}))
+
 (mf/defc fill-menu
-  {::mf/wrap [#(mf/memo' % (mf/check-props ["ids" "values"]))]}
-  [{:keys [ids type values disable-remove?] :as props}]
+  {::mf/wrap [#(mf/memo' % (mf/check-props ["ids" "values" "fill-values"]))]}
+  [{:keys [ids type values fill-values disable-remove?] :as props}]
   (let [show? (or (not (nil? (:fill-color values)))
                   (not (nil? (:fill-color-gradient values))))
 
@@ -43,6 +55,10 @@
                :id (:fill-color-ref-id values)
                :file-id (:fill-color-ref-file values)
                :gradient (:fill-color-gradient values)}
+        
+        _ (println "COLOR" color)
+        _ (println "fill-values" fill-values)
+        
 
         hide-fill-on-export? (:hide-fill-on-export values false)
 
@@ -52,8 +68,17 @@
         (mf/use-callback
          (mf/deps ids)
          (fn [_]
-           (st/emit! (dc/change-fill ids {:color cp/default-color
-                                          :opacity 1}))))
+           #_(st/emit! (dc/change-fill ids {:color cp/default-color
+                                          :opacity 1}))
+
+           
+           (println "on-add" ids)
+           (st/emit! (dch/update-shapes ids #(update % :fill (fnil conj []) {:fill-color cp/default-color
+                                                                              :fill-opacity 1})))
+          ;;  (rx/of (dch/update-shapes shape-ids (fn [shape] (d/merge shape attrs)))
+           ))
+
+        _ (println "fill-values" fill-values)
 
         on-delete
         (mf/use-callback
@@ -68,6 +93,18 @@
            (let [remove-multiple (fn [[_ value]] (not= value :multiple))
                  color (into {} (filter remove-multiple) color)]
              (st/emit! (dc/change-fill ids color)))))
+
+        on-change-extra-fill
+        (mf/use-callback
+         (mf/deps ids)
+         (fn [index]
+           (fn [color]
+             (println "COLOR" color)
+             (st/emit! (dch/update-shapes
+                         ids
+                         #(-> %
+                              (assoc-in [:fill index] {:fill-color (:color color)
+                                                       :fill-opacity (:opacity color)})))))))
 
         on-detach
         (mf/use-callback
@@ -95,18 +132,30 @@
              (dom/set-attribute checkbox "indeterminate" true)
              (dom/remove-attribute checkbox "indeterminate")))))
 
-    (if show?
+    ;; (if show?
       [:div.element-set
        [:div.element-set-title
         [:span label]
-        (when (not disable-remove?)
+        [:div.add-page {:on-click on-add} i/close]
+        #_(when (not disable-remove?)
          [:div.add-page {:on-click on-delete} i/minus])]
 
        [:div.element-set-content
+        [:div (println "aaaaa" color)]
         [:& color-row {:color color
                        :title (tr "workspace.options.fill")
                        :on-change on-change
                        :on-detach on-detach}]
+
+        (for [[index value] (d/enumerate (:fill fill-values []))]
+          [:& color-row {:color {:color (:fill-color value)
+                                 :opacity (:fill-opacity value)
+                                 :id (:fill-color-ref-id value)
+                                 :file-id (:fill-color-ref-file value)
+                                 :gradient (:fill-color-gradient value)}
+                         :title (tr "workspace.options.fill")
+                         :on-change (on-change-extra-fill index)
+                         :on-detach on-detach}])
 
         (when (or (= type :frame)
                   (and (= type :multiple) (some? hide-fill-on-export?)))
@@ -120,7 +169,9 @@
            [:label {:for "show-fill-on-export"}
             (tr "workspace.options.show-fill-on-export")]])]]
 
-      [:div.element-set
+      #_[:div.element-set
        [:div.element-set-title
         [:span label]
-        [:div.add-page {:on-click on-add} i/close]]])))
+        [:div.add-page {:on-click on-add} i/close]]]
+      ;; )
+      ))

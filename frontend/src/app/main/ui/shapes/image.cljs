@@ -44,7 +44,7 @@
         path? (some? (.-d props))]
 
     [:g
-      [:defs
+      #_[:defs
        [:pattern {:id fill-image-id
                   :patternUnits "userSpaceOnUse"
                   :x x

@@ -17,6 +17,7 @@
    [app.main.ui.shapes.frame :as frame]
    [app.main.ui.shapes.gradients :as grad]
    [app.main.ui.shapes.svg-defs :as defs]
+   [app.main.ui.shapes.fills :as fills]
    [app.util.object :as obj]
    [rumext.alpha :as mf]))
 
@@ -33,7 +34,6 @@
         filter-id      (str "filter_" render-id)
         styles         (-> (obj/new)
                            (obj/set! "pointerEvents" pointer-events)
-
                            (cond-> (and (:blend-mode shape) (not= (:blend-mode shape) :normal))
                              (obj/set! "mixBlendMode" (d/name (:blend-mode shape)))))
 
@@ -65,7 +65,8 @@
        [:& filters/filters        {:shape shape :filter-id filter-id}]
        [:& grad/gradient          {:shape shape :attr :fill-color-gradient}]
        [:& grad/gradient          {:shape shape :attr :stroke-color-gradient}]
-       [:& fim/fill-image-pattern {:shape shape :render-id render-id}]
+      ;;  [:& fim/fill-image-pattern {:shape shape :render-id render-id}]
        [:& cs/stroke-defs         {:shape shape :render-id render-id}]
-       [:& frame/frame-clip-def   {:shape shape :render-id render-id}]]
+       [:& frame/frame-clip-def   {:shape shape :render-id render-id}]
+       [:& fills/fills            {:shape shape :render-id render-id}]]
       children]]))

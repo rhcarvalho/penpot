@@ -80,7 +80,8 @@
     attrs))
 
 (defn add-fill [attrs shape render-id]
-  (let [fill-attrs (cond
+  (let [_ (println "add-fill" attrs shape render-id)
+        fill-attrs (cond
                      (contains? shape :fill-image)
                      (let [fill-image-id (str "fill-image-" render-id)]
                        {:fill (str/format "url(#%s)" fill-image-id)})
@@ -193,7 +194,8 @@
 
          styles (-> (obj/get props "style" (obj/new))
                     (obj/merge! svg-styles)
-                    (add-fill shape render-id)
+                    ;; (add-fill shape render-id)
+                    (obj/set! "fill" (str "url(#fill-" render-id ")"))
                     (add-stroke shape render-id)
                     (add-layer-props shape))]
 

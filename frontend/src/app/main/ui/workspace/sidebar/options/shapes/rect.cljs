@@ -40,7 +40,8 @@
 
      [:& fill-menu {:ids ids
                     :type type
-                    :values fill-values}]
+                    :values fill-values
+                    :fill-values (select-keys shape [:fill])}]
 
      [:& stroke-menu {:ids ids
                       :type type
