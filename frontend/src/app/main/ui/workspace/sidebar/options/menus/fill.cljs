@@ -88,7 +88,7 @@
         (fn [index]
           (fn []
             (st/emit! (dch/update-shapes ids #(update % :fill remove-fill-by-index index)))))
-        
+
         ;; TODO Fix
         ;; on-detach
         ;; (mf/use-callback
