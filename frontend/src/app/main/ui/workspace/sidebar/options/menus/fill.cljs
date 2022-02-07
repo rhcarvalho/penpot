@@ -105,7 +105,8 @@
                          #(-> %
                               (assoc-in [:fill index] {:fill-color (:color color)
                                                        :fill-opacity (:opacity color)
-                                                       :fill-color-gradient (:gradient color)})))))))
+                                                      ;;  :fill-color-gradient (:gradient color)
+                                                       })))))))
 ;; TODO: :id -> :fill-color-ref-id :file-id -> :fill-color-ref-file
 
         on-detach
