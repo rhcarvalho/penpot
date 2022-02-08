@@ -112,7 +112,7 @@
           (assoc-in [:workspace-local :picked-shift?] shift?)))))
 
 (defn change-fill
-  [ids color]
+  [ids color position]
   (ptk/reify ::change-fill
     ptk/WatchEvent
     (watch [_ state _]
@@ -122,6 +122,9 @@
             is-text?  #(= :text (:type (get objects %)))
             text-ids  (filter is-text? ids)
             shape-ids (filter (comp not is-text?) ids)
+
+            _ (println "text-ids" text-ids)
+            _ (println "shape-ids" shape-ids)
 
             attrs (cond-> {:fill-color nil
                            :fill-color-gradient nil
@@ -142,11 +145,18 @@
                     (assoc :fill-color-gradient (:gradient color))
 
                     (contains? color :opacity)
-                    (assoc :fill-opacity (:opacity color)))]
+                    (assoc :fill-opacity (:opacity color)))
+            _ (println "attrs" attrs)]
 
         (rx/concat
          (rx/from (map #(dwt/update-text-attrs {:id % :attrs attrs}) text-ids))
-         (rx/of (dch/update-shapes shape-ids (fn [shape] (d/merge shape attrs)))))))))
+         (rx/of (dch/update-shapes
+                 shape-ids
+                 #(-> %
+                      (assoc-in [:fills position] color)))))))))
+
+     ;; (rx/of (dch/update-shapes shape-ids (fn [shape] (d/merge shape attrs)))))))))
+
 
 (defn change-hide-fill-on-export
   [ids hide-fill-on-export]
@@ -207,7 +217,8 @@
 
               update-events
               (fn [color]
-                (rx/of (change-fill ids color)))]
+                ;; TODO
+                (rx/of (change-fill ids color 0)))]
 
           (rx/merge
            ;; Stream that updates the stroke/width and stops if `esc` pressed

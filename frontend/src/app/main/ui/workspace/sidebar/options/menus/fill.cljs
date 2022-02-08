@@ -6,6 +6,7 @@
 
 (ns app.main.ui.workspace.sidebar.options.menus.fill
   (:require
+   [app.common.colors :as clr]
    [app.common.data :as d]
    [app.common.pages :as cp]
    [app.common.uuid :as uuid]
@@ -40,6 +41,14 @@
 ;;      :fill-color-ref-id nil
 ;;      :fill-opacity 1}))
 
+(defn color-values
+  [color]
+  {:color (:fill-color color)
+   :opacity (:fill-opacity color)
+   :id (:fill-color-ref-id color)
+   :file-id (:fill-color-ref-file color)
+   :gradient (:fill-color-gradient color)})
+
 (mf/defc fill-menu
   {::mf/wrap [#(mf/memo' % (mf/check-props ["ids" "values"]))]}
   [{:keys [ids type values disable-remove?] :as props}]
@@ -56,7 +65,7 @@
         ;; _ (println "-------------> 1" (:fills values []))
         ;; _ (println "-------------> 2" (:fill values []))
         ;; _ (println "type" type)
-        ;; _ (println "values" values)
+        _ (println "values" values)
         ;; _ (println "(count ids)" (count ids))
         ;; _ (println ":::::" (vals values))
         ;; _ (println ":::::" (contains? (set (vals values)) :multiple))
@@ -65,18 +74,20 @@
         (mf/use-callback
          (mf/deps ids)
          (fn [_]
-           (st/emit! (dch/update-shapes ids #(update % :fills (fnil conj []) {:fill-color cp/default-color
-                                                                              :fill-opacity 1})))
-           (st/emit! (dc/change-fill ids {:fill-color cp/default-color
-                                          :fill-opacity 1}))
-           (println "dc/change-fill" ids {:fill-color cp/default-color
-                                          :fill-opacity 1})))
+          ;;  (st/emit! (dch/update-shapes ids #(update % :fills (fnil conj []) {:fill-color cp/default-color
+          ;;                                                                     :fill-opacity 1})))
+           ;; TODO
+           (st/emit! (dc/change-fill ids {:color cp/default-color
+                                          :opacity 1} 0))
+           (println "dc/change-fill" ids {:color cp/default-color
+                                          :opacity 1})))
 
         on-delete
         (mf/use-callback
          (mf/deps ids)
          (fn [_]
-           (st/emit! (dc/change-fill ids (into {} uc/empty-color)))))
+           ;; TODO
+           (st/emit! (dc/change-fill ids (into {} uc/empty-color) 0))))
 
         on-change
         (mf/use-callback
@@ -84,16 +95,16 @@
          (fn [index]
            (fn [color]
             ;;  (if multiple-fill?
-               (st/emit! (dch/update-shapes
+             #_(st/emit! (dch/update-shapes
                           ids
                           #(-> %
                                (assoc-in [:fills index] {:fill-color (:color color)
-                                                        :fill-opacity (:opacity color)
+                                                         :fill-opacity (:opacity color)
                                                       ;; :fill-color-gradient (:gradient color)
                                                         ;; TODO: :id -> :fill-color-ref-id :file-id -> :
-                                                        }))))
-               (st/emit! (dc/change-fill ids color))
-               (println "dc/change-fill" ids color)
+                                                         }))))
+             (println ">>>>>>>>>>>>> index" index)
+             (st/emit! (dc/change-fill ids (color-values color) index))
               ;;  )
              )))
                ;; TODO multiple
@@ -106,10 +117,16 @@
         on-remove
         (fn [index]
           (fn []
-            (st/emit! (dch/update-shapes ids #(update % :fills remove-fill-by-index index)))))
+            (st/emit! (dc/change-fill ids {:color cp/default-color
+                                           :opacity 1} index))))
+            ;; (st/emit! (dch/update-shapes ids #(update % :fills remove-fill-by-index index)))))
 
         on-remove-all
-        (fn [_] (st/emit! (dch/update-shapes ids #(assoc % :fills []))))
+        (fn [_]
+          ;; TODO
+          ;; (st/emit! (dch/update-shapes ids #(assoc % :fills [])))
+          (st/emit! (dc/change-fill ids {:color clr/black
+                                         :opacity 1} 0)))
 
         ;; TODO Fix
         ;; on-detach
@@ -147,8 +164,8 @@
        [:div.element-set-content
 
         (cond
-          ;; (= :multiple (:fills values))
-          (contains? (set (vals values)) :multiple)
+          (= :multiple (:fills values))
+          ;; (contains? (set (vals values)) :multiple)
           [:div.element-set-options-group
            [:div.element-set-label (tr "settings.multiple")]
            [:div.element-set-actions
@@ -168,7 +185,8 @@
                           ;; :on-detach on-detach
                             :on-remove (on-remove index)}]])
 
-          (not (contains? values :fills))
+          ;; (not (contains? values :fills))
+          :else
           [:& color-row {:color {:color (:fill-color values)
                                  :opacity (:fill-opacity values)
                                  :id (:fill-color-ref-id values)
