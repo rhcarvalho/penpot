@@ -51,6 +51,9 @@
         hide-fill-on-export? (:hide-fill-on-export values false)
 
         checkbox-ref (mf/use-ref)
+        multiple-fill? (some? (:fill values))
+
+        _ (println "------------->" (:fill values []))
 
         on-add
         (mf/use-callback
@@ -70,14 +73,17 @@
          (mf/deps ids)
          (fn [index]
            (fn [color]
-             (st/emit! (dch/update-shapes
-                        ids
-                        #(-> %
-                             (assoc-in [:fill index] {:fill-color (:color color)
-                                                      :fill-opacity (:opacity color)
+             (if multiple-fill?
+               (st/emit! (dch/update-shapes
+                          ids
+                          #(-> %
+                               (assoc-in [:fill index] {:fill-color (:color color)
+                                                        :fill-opacity (:opacity color)
                                                       ;; :fill-color-gradient (:gradient color)
-                                                      })))))))
-                         ;; TODO: :id -> :fill-color-ref-id :file-id -> :
+                                                        ;; TODO: :id -> :fill-color-ref-id :file-id -> :
+                                                        }))))
+               (st/emit! (dc/change-fill ids color))))))
+               ;; TODO multiple
 
         remove-fill-by-index
         (fn [values index] (->> (d/enumerate values)
@@ -88,6 +94,9 @@
         (fn [index]
           (fn []
             (st/emit! (dch/update-shapes ids #(update % :fill remove-fill-by-index index)))))
+
+        on-remove-all
+        (fn [_] (st/emit! (dch/update-shapes ids #(assoc % :fill []))))
 
         ;; TODO Fix
         ;; on-detach
@@ -119,20 +128,44 @@
       [:div.element-set
        [:div.element-set-title
         [:span label]
-        [:div.add-page {:on-click on-add} i/close]]
+        (when (and (not disable-remove?) (not (= :multiple (:fill values))))
+          [:div.add-page {:on-click on-add} i/close])]
 
        [:div.element-set-content
-        (for [[index value] (d/enumerate (:fill values []))]
-          [:div
-           [:& color-row {:color {:color (:fill-color value)
-                                  :opacity (:fill-opacity value)
-                                  :id (:fill-color-ref-id value)
-                                  :file-id (:fill-color-ref-file value)
-                                  :gradient (:fill-color-gradient value)}
-                          :title (tr "workspace.options.fill")
-                          :on-change (on-change index)
+
+        (cond
+          (= :multiple (:fill values))
+          [:div.element-set-options-group
+           [:div.element-set-label (tr "settings.multiple")]
+           [:div.element-set-actions
+            [:div.element-set-actions-button {:on-click on-remove-all}
+             i/minus]]]
+
+          (seq (:fill values))
+          (for [[index value] (d/enumerate (:fill values []))]
+            [:div
+             [:& color-row {:color {:color (:fill-color value)
+                                    :opacity (:fill-opacity value)
+                                    :id (:fill-color-ref-id value)
+                                    :file-id (:fill-color-ref-file value)
+                                    :gradient (:fill-color-gradient value)}
+                            :title (tr "workspace.options.fill")
+                            :on-change (on-change index)
                           ;; :on-detach on-detach
-                          :on-remove (on-remove index)}]])
+                            :on-remove (on-remove index)}]])
+
+          (not (contains? values :fill))
+          [:& color-row {:color {:color (:fill-color values)
+                                 :opacity (:fill-opacity values)
+                                 :id (:fill-color-ref-id values)
+                                 :file-id (:fill-color-ref-file values)
+                                 :gradient (:fill-color-gradient values)}
+                         :title (tr "workspace.options.fill")
+                         :on-change (on-change 0)
+                          ;; :on-detach on-detach
+                         }]
+          )
+
 
         (when (or (= type :frame)
                   (and (= type :multiple) (some? hide-fill-on-export?)))
