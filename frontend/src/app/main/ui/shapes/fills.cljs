@@ -35,7 +35,7 @@
                          (obj/set! "width" width)
                          (obj/set! "height" height))
           _ (println "shape" shape)
-          gradients (filter #(some? (:fill-color-gradient %)) (:fill shape))]
+          gradients (filter #(some? (:fill-color-gradient %)) (:fills shape))]
 
       [:*
        (for [[index gradient] (-> (d/enumerate gradients) reverse)]
@@ -56,7 +56,7 @@
                   :patternTransform transform
                   :data-loading (str (not (contains? embed uri)))}
         [:g
-         (for [[index value] (-> (d/enumerate (:fill shape [])) reverse)]
+         (for [[index value] (-> (d/enumerate (:fills shape [])) reverse)]
            [:> :rect (-> (attrs/extract-fill-attrs value index)
                          (obj/set! "width" width)
                          (obj/set! "height" height))])

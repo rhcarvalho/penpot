@@ -66,7 +66,7 @@
        [:& defs/svg-defs          {:shape shape :render-id render-id}]
        [:& filters/filters        {:shape shape :filter-id filter-id}]
        [:& grad/gradient          {:shape shape :attr :stroke-color-gradient}]
-       (if (or (= :image (:type shape)) (> (count (:fill shape)) 1))
+       (if (or (= :image (:type shape)) (> (count (:fills shape)) 1))
            [:& fills/fills            {:shape shape :render-id render-id}]
            [:*
             [:& grad/gradient          {:shape shape :attr :fill-color-gradient}]

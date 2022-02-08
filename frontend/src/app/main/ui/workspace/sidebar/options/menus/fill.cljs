@@ -20,12 +20,12 @@
    [rumext.alpha :as mf]))
 
 (def fill-attrs
-  [:fill
-  ;;  :fill-color
-  ;;  :fill-opacity
-  ;;  :fill-color-ref-id
-  ;;  :fill-color-ref-file
-  ;;  :fill-color-gradient
+  [:fills
+   :fill-color
+   :fill-opacity
+   :fill-color-ref-id
+   :fill-color-ref-file
+   :fill-color-gradient
    :hide-fill-on-export])
 
 (def fill-attrs-shape
@@ -51,16 +51,26 @@
         hide-fill-on-export? (:hide-fill-on-export values false)
 
         checkbox-ref (mf/use-ref)
-        multiple-fill? (some? (:fill values))
+        multiple-fill? (some? (:fills values))
 
-        _ (println "------------->" (:fill values []))
+        ;; _ (println "-------------> 1" (:fills values []))
+        ;; _ (println "-------------> 2" (:fill values []))
+        ;; _ (println "type" type)
+        ;; _ (println "values" values)
+        ;; _ (println "(count ids)" (count ids))
+        ;; _ (println ":::::" (vals values))
+        ;; _ (println ":::::" (contains? (set (vals values)) :multiple))
 
         on-add
         (mf/use-callback
          (mf/deps ids)
          (fn [_]
-           (st/emit! (dch/update-shapes ids #(update % :fill (fnil conj []) {:fill-color cp/default-color
-                                                                             :fill-opacity 1})))))
+           (st/emit! (dch/update-shapes ids #(update % :fills (fnil conj []) {:fill-color cp/default-color
+                                                                              :fill-opacity 1})))
+           (st/emit! (dc/change-fill ids {:fill-color cp/default-color
+                                          :fill-opacity 1}))
+           (println "dc/change-fill" ids {:fill-color cp/default-color
+                                          :fill-opacity 1})))
 
         on-delete
         (mf/use-callback
@@ -73,16 +83,19 @@
          (mf/deps ids)
          (fn [index]
            (fn [color]
-             (if multiple-fill?
+            ;;  (if multiple-fill?
                (st/emit! (dch/update-shapes
                           ids
                           #(-> %
-                               (assoc-in [:fill index] {:fill-color (:color color)
+                               (assoc-in [:fills index] {:fill-color (:color color)
                                                         :fill-opacity (:opacity color)
                                                       ;; :fill-color-gradient (:gradient color)
                                                         ;; TODO: :id -> :fill-color-ref-id :file-id -> :
                                                         }))))
-               (st/emit! (dc/change-fill ids color))))))
+               (st/emit! (dc/change-fill ids color))
+               (println "dc/change-fill" ids color)
+              ;;  )
+             )))
                ;; TODO multiple
 
         remove-fill-by-index
@@ -93,10 +106,10 @@
         on-remove
         (fn [index]
           (fn []
-            (st/emit! (dch/update-shapes ids #(update % :fill remove-fill-by-index index)))))
+            (st/emit! (dch/update-shapes ids #(update % :fills remove-fill-by-index index)))))
 
         on-remove-all
-        (fn [_] (st/emit! (dch/update-shapes ids #(assoc % :fill []))))
+        (fn [_] (st/emit! (dch/update-shapes ids #(assoc % :fills []))))
 
         ;; TODO Fix
         ;; on-detach
@@ -128,21 +141,22 @@
       [:div.element-set
        [:div.element-set-title
         [:span label]
-        (when (and (not disable-remove?) (not (= :multiple (:fill values))))
+        (when (and (not disable-remove?) (not (= :multiple (:fills values))))
           [:div.add-page {:on-click on-add} i/close])]
 
        [:div.element-set-content
 
         (cond
-          (= :multiple (:fill values))
+          ;; (= :multiple (:fills values))
+          (contains? (set (vals values)) :multiple)
           [:div.element-set-options-group
            [:div.element-set-label (tr "settings.multiple")]
            [:div.element-set-actions
             [:div.element-set-actions-button {:on-click on-remove-all}
              i/minus]]]
 
-          (seq (:fill values))
-          (for [[index value] (d/enumerate (:fill values []))]
+          (seq (:fills values))
+          (for [[index value] (d/enumerate (:fills values []))]
             [:div
              [:& color-row {:color {:color (:fill-color value)
                                     :opacity (:fill-opacity value)
@@ -154,7 +168,7 @@
                           ;; :on-detach on-detach
                             :on-remove (on-remove index)}]])
 
-          (not (contains? values :fill))
+          (not (contains? values :fills))
           [:& color-row {:color {:color (:fill-color values)
                                  :opacity (:fill-opacity values)
                                  :id (:fill-color-ref-id values)
@@ -163,8 +177,7 @@
                          :title (tr "workspace.options.fill")
                          :on-change (on-change 0)
                           ;; :on-detach on-detach
-                         }]
-          )
+                         }])
 
 
         (when (or (= type :frame)

@@ -198,9 +198,9 @@
                     (add-stroke shape render-id)
                     (add-layer-props shape))
 
-         styles (if (or (= :image (:type shape)) (> (count (:fill shape)) 1))
+         styles (if (or (= :image (:type shape)) (> (count (:fills shape)) 1))
                   (obj/set! styles "fill" (str "url(#fill-" render-id ")"))
-                  (add-fill styles (get-in shape [:fill 0]) render-id 0))]
+                  (add-fill styles (get-in shape [:fills 0]) render-id 0))]
 
      (-> props
          (obj/merge! svg-attrs)
