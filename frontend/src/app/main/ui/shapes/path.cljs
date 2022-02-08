@@ -14,15 +14,10 @@
    [app.util.path.format :as upf]
    [rumext.alpha :as mf]))
 
-;; --- Path Shape
-
 (mf/defc path-shape
   {::mf/wrap-props false}
   [props]
-  (let [shape   (-> (unchecked-get props "shape")
-                    (dissoc :fill-color)
-                    (dissoc :fill-opacity)
-                    (dissoc :fill-image))
+  (let [shape   (unchecked-get props "shape")
         content (:content shape)
         pdata   (mf/with-memo [content]
                   (try
@@ -33,9 +28,6 @@
                                  :shape-id (:id shape)
                                  :cause e)
                        "")))
-
-        ;; render-id  (mf/use-ctx muc/render-ctx)
-        ;; shape (assoc shape :fill-image (str "fill-image-" render-id))
         props   (-> (attrs/extract-style-attrs shape)
                     (obj/set! "d" pdata))]
 

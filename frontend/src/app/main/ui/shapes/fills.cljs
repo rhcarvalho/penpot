@@ -34,10 +34,8 @@
           fill-attrs (-> (attrs/extract-fill-attrs shape-without-image 0)
                          (obj/set! "width" width)
                          (obj/set! "height" height))
-          _ (println ":fill" (:fill shape))
-          gradients (filter #(some? (:fill-color-gradient %)) (:fill shape))
-          _ (println "gradients" gradients)
-          ]
+          _ (println "shape" shape)
+          gradients (filter #(some? (:fill-color-gradient %)) (:fill shape))]
 
       [:*
        (for [[index gradient] (-> (d/enumerate gradients) reverse)]
